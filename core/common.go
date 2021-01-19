@@ -42,30 +42,30 @@ func GetDerrickHome() (string, error) {
 func CheckDerrickFirstSetup() (bool, error) {
 	derrickHome, err := GetDerrickHome()
 	if err != nil {
-		return false, fmt.Errorf("failed to get Derrick home, err: %s", err)
+		return true, fmt.Errorf("failed to get Derrick home, err: %s", err)
 	}
 
 	riggingHome, err := GetRiggingHome()
 	if err != nil {
-		return false, fmt.Errorf("failed to get Rigging home, err: %s", err)
+		return true, fmt.Errorf("failed to get Rigging home, err: %s", err)
 	}
 
 	commandsHome, err := GetCommandsHome()
 	if err != nil {
-		return false, fmt.Errorf("failed to get CommandsHome home, err: %s", err)
+		return true, fmt.Errorf("failed to get CommandsHome home, err: %s", err)
 	}
 
 	if _, err := os.Stat(derrickHome); err != nil {
-		return false, err
+		return true, err
 	}
 	if _, err := os.Stat(riggingHome); err != nil {
-		return false, err
+		return true, err
 	}
 	if _, err := os.Stat(commandsHome); err != nil {
-		return false, err
+		return true, err
 	}
 
-	return true, nil
+	return false, nil
 }
 
 func GetRiggingHome() (string, error) {

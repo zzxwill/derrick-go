@@ -21,7 +21,7 @@ func Run() {
 }
 
 func preLoad() error {
-	fmt.Println(core.DerrickLogo)
+	fmt.Print(core.DerrickLogo)
 	if err := core.InitDirs(); err != nil {
 		return fmt.Errorf("failed to init Derrick home, err: %s", err)
 	}
@@ -29,13 +29,13 @@ func preLoad() error {
 }
 
 func load() error {
-	firstTimeFlag, err := core.CheckDerrickFirstSetup()
-	if err != nil {
-		return err
-	} else if firstTimeFlag {
+	firstTimeFlag, _ := core.CheckDerrickFirstSetup()
+	if firstTimeFlag {
 		if err := preLoad(); err != nil {
 			return err
 		}
 	}
+
+	core.LoadRiggings()
 	return nil
 }
