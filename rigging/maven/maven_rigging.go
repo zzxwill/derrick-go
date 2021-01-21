@@ -17,3 +17,7 @@ func (rig MavenRigging) Detect(workspace string) (bool, string) {
 	}
 	return false, ""
 }
+
+func (rig MavenRigging) Compile() (map[string]string, error) {
+	return nil, nil
+}

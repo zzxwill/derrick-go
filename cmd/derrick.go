@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cloud-native-application/derrick-go/common"
+
 	"github.com/cloud-native-application/derrick-go/core"
 )
 
@@ -21,15 +23,15 @@ func Run() {
 }
 
 func preLoad() error {
-	fmt.Print(core.DerrickLogo)
-	if err := core.InitDirs(); err != nil {
+	fmt.Print(common.DerrickLogo)
+	if err := common.InitDirs(); err != nil {
 		return fmt.Errorf("failed to init Derrick home, err: %s", err)
 	}
 	return nil
 }
 
 func load() error {
-	firstTimeFlag, _ := core.CheckDerrickFirstSetup()
+	firstTimeFlag, _ := common.CheckDerrickFirstSetup()
 	if firstTimeFlag {
 		if err := preLoad(); err != nil {
 			return err

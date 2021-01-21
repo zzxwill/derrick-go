@@ -17,3 +17,7 @@ func (rig NodeJSRigging) Detect(workspace string) (bool, string) {
 	}
 	return false, ""
 }
+
+func (rig NodeJSRigging) Compile() (map[string]string, error) {
+	return nil, nil
+}

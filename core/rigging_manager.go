@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/cloud-native-application/derrick-go/common"
 	"github.com/cloud-native-application/derrick-go/rigging/golang"
 	"github.com/cloud-native-application/derrick-go/rigging/maven"
 	"github.com/cloud-native-application/derrick-go/rigging/nodejs"
@@ -22,7 +23,7 @@ import (
 //}
 
 func LoadRiggings() []ExtensionPoint {
-	riggings := []Rigging{golang.GolangRigging{}, maven.MavenRigging{}, nodejs.NodeJSRigging{}, php.PHPRigging{}, python.PythonRigging{}}
+	riggings := []common.Rigging{golang.GolangRigging{}, maven.MavenRigging{}, nodejs.NodeJSRigging{}, php.PHPRigging{}, python.PythonRigging{}}
 	extensionPoints := make([]ExtensionPoint, len(riggings))
 	for i, rig := range riggings {
 		extensionPoints[i] = Register(rig)

@@ -2,10 +2,12 @@ package core
 
 import (
 	"reflect"
+
+	"github.com/cloud-native-application/derrick-go/common"
 )
 
 type ExtensionPoint struct {
-	Rigging Rigging
+	Rigging common.Rigging
 }
 
 func getRiggingName(platform interface{}) string {
@@ -16,7 +18,7 @@ func loadRigging(detect interface{}) reflect.Value {
 	return reflect.ValueOf(detect)
 }
 
-func Register(rig Rigging) ExtensionPoint {
+func Register(rig common.Rigging) ExtensionPoint {
 	return ExtensionPoint{
 		Rigging: rig,
 	}

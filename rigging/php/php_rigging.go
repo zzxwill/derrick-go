@@ -17,3 +17,7 @@ func (rig PHPRigging) Detect(workspace string) (bool, string) {
 	}
 	return false, ""
 }
+
+func (rig PHPRigging) Compile() (map[string]string, error) {
+	return nil, nil
+}
