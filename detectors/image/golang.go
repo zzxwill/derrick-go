@@ -3,6 +3,9 @@ package image
 import (
 	"os/exec"
 	"regexp"
+	"strings"
+
+	"github.com/cloud-native-application/derrick-go/common"
 )
 
 const (
@@ -27,10 +30,12 @@ func (detector GolangVersionDetector) Execute() (map[string]string, error) {
 		return nil, err
 	}
 	matched := re.Find(output)
+	version := common.Version
 	if matched == nil {
-		return map[string]string{"version": DEFAULT_VERSION}, nil
+		return map[string]string{version: DEFAULT_VERSION}, nil
 	}
-	return map[string]string{"version": string(matched)}, nil
+
+	return map[string]string{version: strings.ReplaceAll(string(matched), "go", "")}, nil
 }
 
 func (detector GolangVersionDetector) Name() string {

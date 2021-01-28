@@ -4,36 +4,36 @@ kind: Service
 metadata:
   annotations:
     derrick.service.type: nodeport
-    derrick.version: {{ derrick_version }}
+    derrick.version: {{ .DerrickVersion }}
   labels:
-    derrick.service: {{ project_name }}
-  name: {{ project_name }}
+    derrick.service: {{ .ProjectName }}
+  name: {{ .ProjectName }}
 spec:
   ports:
   - name: "8080"
     port: 8080
     targetPort: 8080
   selector:
-    derrick.service: {{ project_name }}
+    derrick.service: {{ .ProjectName }}
   type: NodePort
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   annotations:
-    derrick.version: {{ derrick_version }}
+    derrick.version: {{ .DerrickVersion }}
   labels:
-    derrick.service: {{ project_name }}
-  name: {{ project_name }}
+    derrick.service: {{ .ProjectName }}
+  name: {{ .ProjectName }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        derrick.service: {{ project_name }}
+        derrick.service: {{ .ProjectName }}
     spec:
       containers:
-      - image: {{ image_with_tag }}
+      - image: {{ .ImageWithTag }}
         name: web
         ports:
         - containerPort: 8080

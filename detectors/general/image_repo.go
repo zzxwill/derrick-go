@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/cloud-native-application/derrick-go/common"
 )
 
 type ImageRepoDetector struct {
@@ -19,7 +20,7 @@ func (detector ImageRepoDetector) Execute() (map[string]string, error) {
 		return nil, fmt.Errorf("hit an issue to read app name: %w", err)
 	}
 	result := map[string]string{
-		"image_with_tag": image,
+		common.ImageWithTag: image,
 	}
 	return result, nil
 }

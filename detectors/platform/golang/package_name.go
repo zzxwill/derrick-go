@@ -4,7 +4,12 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
+
+	"github.com/cloud-native-application/derrick-go/common"
 )
+
+const SrcTag = "/src/"
 
 type PackageNameDetector struct {
 }
@@ -14,7 +19,7 @@ func (detector PackageNameDetector) Execute() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	re, err := regexp.Compile("/src/.*")
+	re, err := regexp.Compile(fmt.Sprintf("%s.*", SrcTag))
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +27,7 @@ func (detector PackageNameDetector) Execute() (map[string]string, error) {
 	if len(result) == 0 {
 		return nil, fmt.Errorf("the source code is not in GOPATH")
 	}
-	return map[string]string{"project_folder": result[0]}, nil
+	return map[string]string{common.ProjectFolder: strings.ReplaceAll(result[0], SrcTag, "")}, nil
 }
 
 func (detector PackageNameDetector) Name() string {

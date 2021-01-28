@@ -27,8 +27,8 @@ func (detector DerrickDetector) Execute() (map[string]string, error) {
 		projectName = base
 	}
 	return map[string]string{
-		"derrick_version": common.DERRICK_VERSION,
-		"project_name":    projectName,
+		common.DerrickVersion: common.DERRICK_VERSION,
+		common.ProjectName:    projectName,
 	}, nil
 
 }

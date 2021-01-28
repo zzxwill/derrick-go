@@ -1,18 +1,21 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 
-	"github.com/cloud-native-application/derrick-go/common"
-	"github.com/flosch/pongo2"
-
-	"github.com/cloud-native-application/derrick-go/core"
+	"github.com/Masterminds/sprig/v3"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cobra"
+
+	"github.com/cloud-native-application/derrick-go/common"
+	"github.com/cloud-native-application/derrick-go/core"
 )
 
 var projectPath string
@@ -44,31 +47,25 @@ func execute(workspace string) error {
 	case 0:
 		fmt.Println("Failed to detect your application's platform.\nMaybe you can upgrade Derrick to get more platforms supported.")
 		return nil
-	case 1:
-		fmt.Println(fmt.Sprintf("Derrick detect your platform is %s and compile it successfully.", suitableRiggings[0].Platform))
 	default:
 		// TODO(zzxwill) ask users to choose from one of them
 		fmt.Println("More than one rigging can handle the application.")
 		return nil
 	}
-	rig := suitableRiggings[0].ExtensionPoint.Rigging
+	suitableRigging := suitableRiggings[0]
+	rig := suitableRigging.ExtensionPoint.Rigging
 	detectedContext, err := rig.Compile()
 	if err != nil {
 		return err
 	}
 	fmt.Println(detectedContext)
-	destDir := filepath.Join(workspace, ".derrick")
-	if _, err := os.Stat(destDir); err != nil && os.IsNotExist(err) {
-		if err := os.MkdirAll(destDir, 0750); err != nil {
-			return err
-		}
-	}
-	if err := renderTemplates(rig, detectedContext, destDir); err != nil {
+	if err := renderTemplates(rig, detectedContext, workspace); err != nil {
 		return err
 	}
 	if err != nil {
 		return err
 	}
+	fmt.Println("Successfully detected your platform is %s and compiled it successfully.", suitableRigging.Platform)
 
 	return nil
 }
@@ -99,7 +96,7 @@ func renderTemplates(rig common.Rigging, detectedContext map[string]string, dest
 	templateDir := filepath.Join(filepath.Clean(pkgPath), "templates")
 	var templates []string
 	err := filepath.Walk(templateDir, func(path string, info os.FileInfo, err error) error {
-		if info != nil && strings.HasSuffix(info.Name(), ".j2") {
+		if info != nil && strings.HasSuffix(info.Name(), ".tmpl") {
 			templates = append(templates, info.Name())
 		}
 		return nil
@@ -108,35 +105,67 @@ func renderTemplates(rig common.Rigging, detectedContext map[string]string, dest
 		return err
 	}
 	for _, t := range templates {
-		renderedTemplate, err := renderTemplate(filepath.Join(templateDir, t), detectedContext)
+		renderedTemplate, err := renderTemplate(templateDir, t, detectedContext)
 		if err != nil {
 			return err
 		}
-		if err := ioutil.WriteFile(filepath.Join(destDir, t), []byte(renderedTemplate), 0750); err != nil {
+		renderedTemplateName := strings.Split(t, ".tmpl")
+		if len(renderedTemplateName) != 2 {
+			return fmt.Errorf("template %s is not in the right format", t)
+		}
+
+		if err := ioutil.WriteFile(filepath.Join(destDir, renderedTemplateName[0]), []byte(renderedTemplate), 0750); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func renderTemplate(templatePath string, detectedContext map[string]string) (string, error) {
-	data, err := ioutil.ReadFile(templatePath)
-	if err != nil {
-		return "", err
-	}
-
-	tpl, err := pongo2.FromString(string(data))
-	if err != nil {
-		return "", err
-	}
-	ctx := make(pongo2.Context, len(detectedContext))
-	for k, v := range detectedContext {
-		ctx[k] = v
-	}
-
-	out, err := tpl.Execute(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return out, nil
+type TemplateRenderContext struct {
+	ImageWithTag   string
+	Version        string
+	ProjectFolder  string
+	DerrickVersion string
+	ProjectName    string
 }
+
+func renderTemplate(templateDir, templateFile string, detectedContext map[string]string) (string, error) {
+	var ctx TemplateRenderContext
+	mapstructure.Decode(detectedContext, &ctx)
+	data, err := ioutil.ReadFile(filepath.Join(templateDir, templateFile))
+	if err != nil {
+		return "", err
+	}
+	tmpl, err := template.New(templateFile).Funcs(sprig.FuncMap()).Parse(string(data))
+	if err != nil {
+		return "", err
+	}
+	var wr bytes.Buffer
+	err = tmpl.Execute(&wr, ctx)
+	if err != nil {
+		return "", err
+	}
+	return wr.String(), nil
+}
+
+//func renderTemplate(templatePath string, detectedContext map[string]string) (string, error) {
+//	data, err := ioutil.ReadFile(templatePath)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	tpl, err := pongo2.FromString(string(data))
+//	if err != nil {
+//		return "", err
+//	}
+//	ctx := make(pongo2.Context, len(detectedContext))
+//	for k, v := range detectedContext {
+//		ctx[k] = v
+//	}
+//
+//	out, err := tpl.Execute(ctx)
+//	if err != nil {
+//		panic(err)
+//	}
+//	return out, nil
+//}
