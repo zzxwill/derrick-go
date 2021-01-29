@@ -17,7 +17,7 @@ spec:
     derrick.service: {{ .ProjectName }}
   type: NodePort
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
@@ -26,6 +26,9 @@ metadata:
     derrick.service: {{ .ProjectName }}
   name: {{ .ProjectName }}
 spec:
+  selector:
+    matchLabels:
+      derrick.service: {{ .ProjectName }}
   replicas: 1
   template:
     metadata:

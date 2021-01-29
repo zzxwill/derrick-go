@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -42,31 +43,49 @@ type SuitableRiggings struct {
 }
 
 func execute(workspace string) error {
+	var err error
+	if workspace == "" {
+		workspace, err = os.Getwd()
+		if err != nil {
+			return err
+		}
+	}
+	if _, err := os.Stat(workspace); err != nil {
+		return err
+	}
 	suitableRiggings := detect(workspace)
-	switch len(suitableRiggings) {
-	case 0:
+	riggingNo := len(suitableRiggings)
+	if riggingNo == 0 {
 		fmt.Println("Failed to detect your application's platform.\nMaybe you can upgrade Derrick to get more platforms supported.")
 		return nil
-	default:
+	} else if riggingNo > 1 {
 		// TODO(zzxwill) ask users to choose from one of them
 		fmt.Println("More than one rigging can handle the application.")
 		return nil
 	}
+
 	suitableRigging := suitableRiggings[0]
 	rig := suitableRigging.ExtensionPoint.Rigging
 	detectedContext, err := rig.Compile()
 	if err != nil {
 		return err
 	}
-	fmt.Println(detectedContext)
 	if err := renderTemplates(rig, detectedContext, workspace); err != nil {
 		return err
 	}
 	if err != nil {
 		return err
 	}
-	fmt.Println("Successfully detected your platform is %s and compiled it successfully.", suitableRigging.Platform)
+	fmt.Println(fmt.Sprintf("Successfully detected your platform is %s and compiled it successfully.", suitableRigging.Platform))
 
+	// write configuration context to a file located in the application folder
+	data, err := json.Marshal(detectedContext)
+	if err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(filepath.Join(workspace, common.DerrickApplicationConf), data, 0750); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -121,16 +140,8 @@ func renderTemplates(rig common.Rigging, detectedContext map[string]string, dest
 	return nil
 }
 
-type TemplateRenderContext struct {
-	ImageWithTag   string
-	Version        string
-	ProjectFolder  string
-	DerrickVersion string
-	ProjectName    string
-}
-
 func renderTemplate(templateDir, templateFile string, detectedContext map[string]string) (string, error) {
-	var ctx TemplateRenderContext
+	var ctx common.TemplateRenderContext
 	mapstructure.Decode(detectedContext, &ctx)
 	data, err := ioutil.ReadFile(filepath.Join(templateDir, templateFile))
 	if err != nil {
@@ -147,25 +158,3 @@ func renderTemplate(templateDir, templateFile string, detectedContext map[string
 	}
 	return wr.String(), nil
 }
-
-//func renderTemplate(templatePath string, detectedContext map[string]string) (string, error) {
-//	data, err := ioutil.ReadFile(templatePath)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	tpl, err := pongo2.FromString(string(data))
-//	if err != nil {
-//		return "", err
-//	}
-//	ctx := make(pongo2.Context, len(detectedContext))
-//	for k, v := range detectedContext {
-//		ctx[k] = v
-//	}
-//
-//	out, err := tpl.Execute(ctx)
-//	if err != nil {
-//		panic(err)
-//	}
-//	return out, nil
-//}

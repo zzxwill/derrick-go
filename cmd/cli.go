@@ -28,6 +28,7 @@ func Commands() *cobra.Command {
 	cmd.AddCommand(
 		NewVersionCommand(),
 		Init(),
+		Up(),
 	)
 	return cmd
 }

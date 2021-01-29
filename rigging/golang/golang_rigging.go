@@ -14,12 +14,8 @@ import (
 )
 
 const (
-	Platform             = "Golang"
-	Meta                 = "Meta"
-	Dockerfile           = "Dockerfile.j2"
-	Jenkinsfile          = "Jenkinsfile.j2"
-	DockerCompose        = "docker-compose.yml.j2"
-	KubernetesDeployment = "kubernetes-deployment.yaml.j2"
+	Platform = "Golang"
+	Meta     = "Meta"
 )
 
 type GolangRigging struct {
@@ -48,25 +44,24 @@ func (rig GolangRigging) Compile() (map[string]string, error) {
 	if err := dr.RegisterDetector(general.ImageRepoDetector{}, Meta); err != nil {
 		return nil, err
 	}
-	if err := dr.RegisterDetector(image.GolangVersionDetector{}, Dockerfile); err != nil {
+	if err := dr.RegisterDetector(image.GolangVersionDetector{}, common.Dockerfile); err != nil {
 		return nil, err
 	}
-	if err := dr.RegisterDetector(platform.PackageNameDetector{}, Dockerfile); err != nil {
-		return nil, err
-	}
-
-	if err := dr.RegisterDetector(general.ImageRepoDetector{}, Jenkinsfile); err != nil {
+	if err := dr.RegisterDetector(platform.PackageNameDetector{}, common.Dockerfile); err != nil {
 		return nil, err
 	}
 
-	if err := dr.RegisterDetector(general.ImageRepoDetector{}, DockerCompose); err != nil {
-		return nil, err
-	}
+	//if err := dr.RegisterDetector(general.ImageRepoDetector{}, Jenkinsfile); err != nil {
+	//	return nil, err
+	//}
 
-	if err := dr.RegisterDetector(general.ImageRepoDetector{}, KubernetesDeployment); err != nil {
-		return nil, err
-	}
-	if err := dr.RegisterDetector(general.DerrickDetector{}, KubernetesDeployment); err != nil {
+	//if err := dr.RegisterDetector(general.ImageRepoDetector{}, common.DockerCompose); err != nil {
+	//	return nil, err
+	//}
+	//if err := dr.RegisterDetector(general.ImageRepoDetector{}, common.KubernetesDeployment); err != nil {
+	//	return nil, err
+	//}
+	if err := dr.RegisterDetector(general.DerrickDetector{}, common.KubernetesDeployment); err != nil {
 		return nil, err
 	}
 	return dr.GenerateReport(), nil

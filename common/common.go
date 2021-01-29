@@ -2,7 +2,9 @@ package common
 
 import (
 	"fmt"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -24,7 +26,14 @@ Derrick is a scaffold tool to migrate applications
 You can use Derrick to migrate your project simply.
 ===================================================
 `
-	DERRICK_VERSION = "0.0.1"
+	DERRICK_VERSION        = "0.0.1"
+	DerrickApplicationConf = "derrick_conf"
+)
+
+const (
+	Dockerfile           = "Dockerfile"
+	DockerCompose        = "DockerCompose"
+	KubernetesDeployment = "kubernetes-deployment.yaml"
 )
 
 // GetDerrickHome return vela home dir
@@ -121,4 +130,42 @@ func InitCommandsDir() error {
 		return err
 	}
 	return os.MkdirAll(home, 0755)
+}
+
+func CheckDerrickInitStep(workspace string) bool {
+	if _, err := os.Stat(filepath.Join(workspace, DerrickApplicationConf)); err == nil {
+		return true
+	}
+	return false
+}
+
+func CheckDockerFileExisted(workspace string) bool {
+	if _, err := os.Stat(filepath.Join(workspace, Dockerfile)); err == nil {
+		return true
+	}
+	return false
+}
+
+// RealtimePrintCommandOutput prints command output in real time
+// If logFile is "", it will prints the stdout, or it will write to local file
+func RealtimePrintCommandOutput(cmd *exec.Cmd, logFile string) error {
+	var writer io.Writer
+	if logFile == "" {
+		writer = io.MultiWriter(os.Stdout)
+	} else {
+		if _, err := os.Stat(filepath.Dir(logFile)); err != nil {
+			return err
+		}
+		f, err := os.Create(filepath.Clean(logFile))
+		if err != nil {
+			return err
+		}
+		writer = io.MultiWriter(f)
+	}
+	cmd.Stdout = writer
+	cmd.Stderr = writer
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	return nil
 }

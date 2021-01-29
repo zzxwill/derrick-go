@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/cloud-native-application/derrick-go/common"
-
 	"github.com/cloud-native-application/derrick-go/core"
 )
 

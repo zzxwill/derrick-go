@@ -17,7 +17,7 @@ func (detector ImageRepoDetector) Execute() (map[string]string, error) {
 	}
 	err := survey.AskOne(prompt, &image, survey.WithValidator(survey.Required))
 	if err != nil {
-		return nil, fmt.Errorf("hit an issue to read app name: %w", err)
+		return nil, fmt.Errorf("hit an issue to fetch image name: %w", err)
 	}
 	result := map[string]string{
 		common.ImageWithTag: image,
