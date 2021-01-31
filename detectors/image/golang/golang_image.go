@@ -1,4 +1,4 @@
-package image
+package golang
 
 import (
 	"os/exec"

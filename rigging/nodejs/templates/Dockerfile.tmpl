@@ -1,5 +1,5 @@
 # Build stage
-FROM node:{{ version }}-alpine AS base
+FROM node:alpine{{ .Version }} AS base
 WORKDIR /app
 COPY package.json .
 RUN npm set progress=false && npm config set depth 0

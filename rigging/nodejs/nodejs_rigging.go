@@ -3,6 +3,11 @@ package nodejs
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/cloud-native-application/derrick-go/common"
+	"github.com/cloud-native-application/derrick-go/detectors/general"
+	image "github.com/cloud-native-application/derrick-go/detectors/image/nodejs"
+	platform "github.com/cloud-native-application/derrick-go/detectors/platform/golang"
 )
 
 const Platform = "NodeJS"
@@ -19,5 +24,21 @@ func (rig NodeJSRigging) Detect(workspace string) (bool, string) {
 }
 
 func (rig NodeJSRigging) Compile() (map[string]string, error) {
-	return nil, nil
+	dr := &common.DetectorReport{
+		Nodes: map[string]common.DetectorReport{},
+		Store: map[string]string{},
+	}
+	if err := dr.RegisterDetector(general.ImageRepoDetector{}, common.Meta); err != nil {
+		return nil, err
+	}
+	if err := dr.RegisterDetector(image.NodeJSVersionDetector{}, common.Dockerfile); err != nil {
+		return nil, err
+	}
+	if err := dr.RegisterDetector(platform.PackageNameDetector{}, common.Dockerfile); err != nil {
+		return nil, err
+	}
+	if err := dr.RegisterDetector(general.DerrickDetector{}, common.KubernetesDeployment); err != nil {
+		return nil, err
+	}
+	return dr.GenerateReport(), nil
 }

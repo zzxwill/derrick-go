@@ -31,6 +31,7 @@ You can use Derrick to migrate your project simply.
 )
 
 const (
+	Meta                 = "Meta"
 	Dockerfile           = "Dockerfile"
 	DockerCompose        = "DockerCompose"
 	KubernetesDeployment = "kubernetes-deployment.yaml"

@@ -7,15 +7,13 @@ import (
 	"strings"
 
 	"github.com/cloud-native-application/derrick-go/common"
-
 	"github.com/cloud-native-application/derrick-go/detectors/general"
-	"github.com/cloud-native-application/derrick-go/detectors/image"
+	image "github.com/cloud-native-application/derrick-go/detectors/image/golang"
 	platform "github.com/cloud-native-application/derrick-go/detectors/platform/golang"
 )
 
 const (
 	Platform = "Golang"
-	Meta     = "Meta"
 )
 
 type GolangRigging struct {
@@ -41,7 +39,7 @@ func (rig GolangRigging) Compile() (map[string]string, error) {
 		Nodes: map[string]common.DetectorReport{},
 		Store: map[string]string{},
 	}
-	if err := dr.RegisterDetector(general.ImageRepoDetector{}, Meta); err != nil {
+	if err := dr.RegisterDetector(general.ImageRepoDetector{}, common.Meta); err != nil {
 		return nil, err
 	}
 	if err := dr.RegisterDetector(image.GolangVersionDetector{}, common.Dockerfile); err != nil {
