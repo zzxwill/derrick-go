@@ -21,7 +21,7 @@ func BuildImage(workspace string) error {
 		// TODO(zzxwill) need to check whether Docker is installed
 		return err
 	}
-	fmt.Println(fmt.Sprintf("The application image %s has been successfully buil.", dockerImage))
+	fmt.Println(fmt.Sprintf("The application image %s has been successfully built.", dockerImage))
 	return nil
 }
 

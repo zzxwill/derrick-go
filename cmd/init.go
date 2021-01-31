@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
+	"text/template"
+
+	"github.com/markbates/pkger"
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/mitchellh/mapstructure"
@@ -112,9 +114,10 @@ func renderTemplates(rig common.Rigging, detectedContext map[string]string, dest
 	// TODO(zzxwill) PkgPath() returns github.com/cloud-native-application/derrick-go/rigging/golang/templates
 	// there might be a better solution get the direcotry of the templates
 	pkgPath := strings.Join(strings.Split(reflect.TypeOf(rig).PkgPath(), "/")[3:], "/")
-	templateDir := filepath.Join(filepath.Clean(pkgPath), "templates")
+	absTemplateDir := filepath.Join("/", filepath.Clean(pkgPath))
+	templateDir := filepath.Join(absTemplateDir, "templates")
 	var templates []string
-	err := filepath.Walk(templateDir, func(path string, info os.FileInfo, err error) error {
+	err := pkger.Walk(absTemplateDir, func(path string, info os.FileInfo, err error) error {
 		if info != nil && strings.HasSuffix(info.Name(), ".tmpl") {
 			templates = append(templates, info.Name())
 		}
@@ -132,7 +135,6 @@ func renderTemplates(rig common.Rigging, detectedContext map[string]string, dest
 		if len(renderedTemplateName) != 2 {
 			return fmt.Errorf("template %s is not in the right format", t)
 		}
-
 		if err := ioutil.WriteFile(filepath.Join(destDir, renderedTemplateName[0]), []byte(renderedTemplate), 0750); err != nil {
 			return err
 		}
@@ -143,11 +145,16 @@ func renderTemplates(rig common.Rigging, detectedContext map[string]string, dest
 func renderTemplate(templateDir, templateFile string, detectedContext map[string]string) (string, error) {
 	var ctx common.TemplateRenderContext
 	mapstructure.Decode(detectedContext, &ctx)
-	data, err := ioutil.ReadFile(filepath.Join(templateDir, templateFile))
+	f, err := pkger.Open(filepath.Join(templateDir, templateFile))
 	if err != nil {
 		return "", err
 	}
-	tmpl, err := template.New(templateFile).Funcs(sprig.FuncMap()).Parse(string(data))
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	tmpl, err := template.New(templateFile).Funcs(template.FuncMap(sprig.FuncMap())).Parse(string(data))
 	if err != nil {
 		return "", err
 	}
