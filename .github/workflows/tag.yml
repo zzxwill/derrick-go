@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: oprypin/find-latest-tag@v1
         with:
-          repository: cloud-native-application/derrick-go  # The repository to scan.
+          repository: zzxwill/derrick-go  # The repository to scan.
           releases-only: true  # We know that all relevant tags have a GitHub release for them.
         id: octokit  # The step ID to refer to later.
 
