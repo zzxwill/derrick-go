@@ -13,5 +13,10 @@ jobs:
           repository: zzxwill/derrick-go  # The repository to scan.
           releases-only: true  # We know that all relevant tags have a GitHub release for them.
         id: octokit  # The step ID to refer to later.
-
-      - run: echo "Octokit is at version ${{ steps.octokit.outputs.tag }}"
+      - name: Get the version
+        id: get_version
+        run:
+          echo ::set-output name=VERSION::hhhh-${{ steps.octokit.outputs.tag }}
+      - run: |
+          version=${{ steps.get_version.outputs.VERSION }}
+          echo $version
