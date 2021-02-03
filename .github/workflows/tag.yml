@@ -1,0 +1,16 @@
+name: Registry
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  poc:
+    steps:
+      - uses: oprypin/find-latest-tag@v1
+        with:
+          repository: cloud-native-application/derrick-go  # The repository to scan.
+          releases-only: true  # We know that all relevant tags have a GitHub release for them.
+        id: octokit  # The step ID to refer to later.
+
+      - run: echo "Octokit is at version ${{ steps.octokit.outputs.tag }}"
